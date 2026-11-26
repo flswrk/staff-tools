@@ -327,7 +327,7 @@ const firebaseConfig = {
   measurementId: "G-FY4YZN81FE"
 };
 var COLLECTION = "tools";
-var ADMIN_UIDS = ["7tt0UtWbArUI5fWSXPYxbTE8scQ2","GxSCrKip1DPnfce6eVgAwS1ByZz2"];   // Firebase user UIDs: only these accounts can edit
+var ADMIN_UIDS = ["GxSCrKip1DPnfce6eVgAwS1ByZz2"];   // Firebase user UIDs: only these accounts can edit
 /* Document fields: name, subtext, link, qr (true/false). Cards sort A–Z by name. */
 /* ======================================================== */
 
@@ -697,8 +697,9 @@ if(!configured){
       me=u;applyName(u);
       if(ADMIN_UIDS.indexOf(u.uid)>-1){ isAdmin=true;refreshEditBtn();hideGate();startTools();updateFoot();return; }
       var ref=db.collection("sessions").doc(u.uid),dev=deviceId();
-      ref.set({deviceId:dev,email:u.email||"",label:deviceLabel(),createdAt:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){
-        return true;
+      ref.get().then(function(cur){
+        if(cur.exists&&cur.data().deviceId===dev) return true;
+        return ref.set({deviceId:dev,email:u.email||"",label:deviceLabel(),createdAt:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){return true;});
       }).then(function(ok){
         if(ok!==true) return;
         refreshEditBtn();hideGate();startTools();updateFoot();
